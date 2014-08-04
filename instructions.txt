@@ -1,0 +1,132 @@
+Generally speaking, you do not want any part of your build directory to include spaces. This may cause significant problems with the building process.
+
+Be sure to clean up all the zipped folders before running the .nsi file.
+
+It is recommended to test the library pack before running the .nsi file to compile an installer. You can do this by modifying the paths/etc. in the registry and doing a clean rebuild on Vana. You'll want to check the full C/C++ command line in one of the project's properties to verify that the new paths have been applied. Test both Debug and Release.
+
+
+=== Boost ===
+1. Download the latest release from http://sourceforge.net/projects/boost/files/boost/ and extract it to the toolset version folder.
+	- e.g. /120/boost_1_55_0/
+
+2. Open a cmd prompt and navigate to the Boost folder through cd. Alternatively, shift + right click on the background of the folder in Explorer gives you an "open command window here" option.
+
+3. Run the command: bootstrap
+
+4. Run the command: .\b2 --with-date_time --with-system --with-regex
+
+5. Take the lib files in /stage/lib/ directory and move them into the LazurBeemz lib folder.
+	- e.g. /120/lib/Debug/libbost_date_time-vc120-mt-gd-1_55.lib
+	- e.g. /120/lib/Release/libbost_date_time-vc120-mt-1_55.lib
+	- Be sure to split up debug and release properly.
+
+6. Remove any directories that aren't /boost/, /libs/, and /tools/.
+
+
+=== SOCI ===
+1. Download 3.1.0 of SOCI from http://sourceforge.net/projects/soci/files/soci/ and extract it to the toolset version folder.
+	- e.g. /120/soci-3.1.0/
+	- The 3.2.0 line made some code-incompatible changes and caused completely silent failures when tested. Further versions should be tested extremely well before being considered.
+
+2. Download and install the latest CMake GUI for Windows from http://www.cmake.org/cmake/resources/software.html
+
+3. Open up cmake-gui.exe.
+
+4. Put the SOCI base path into the "Where is the source code" box.
+	- e.g. E:/Temp/LazurBeemz/120/soci-3.1.0/
+
+5. Add /build/ to your directory for the "Where to build the binaries" box.
+	- e.g. E:/Temp/LazurBeemz/120/soci-3.1.0/build/
+
+6. Click the Configure button and set "Visual Studio 12 2013" as your compiler (or a more recent one if you're building for a newer toolset).
+
+7. Wait for it to finish with configuration.
+
+7.5. Recommended modifications before clicking the Generate button.
+	- Modify CMAKE_CONFIGURATION_TYPES to only consist of "Debug;Release;"
+	- Ensure that MySQL_LIBRARY is consistent with the location of MySQL and the source files.
+	- Uncheck all boxes except SOCI_MYSQL and WITH_MYSQL.
+
+8. After clicking the Generate button, go to the build directory to find a solution file generated.
+	- An important point to note is that the project was generated with absolute file references, so changing the directory names at any point from here on will cause problems.
+	- In the case where it doesn't generate the MySQL project, you may have to click the "Advanced" checkbox in the CMake dialog and then populate MYSQL_INCLUDE_DIR manually and re-generate the project files.
+
+9. Open the solution file.
+
+9.5. Remove all projects that aren't soci_core-static and soci_mysql-static.
+
+10. Configure both projects to output lib files without the version name in both Debug and Release configurations.
+	- e.g. Under Configuration Properties -> General, change "Target Name" to libsoci_core instead of libsoci_core_3_1
+
+11. Configure the .pdb to utilize the project name for the Debug configuration in both projects.
+	- e.g. Under Configuration Properties -> C/C++ -> Output Files, change "Program Database File Name" to $(OutDir)$(TargetName).pdb instead of the default value.
+
+12. In soci_core-static -> Header Files -> unsigned-types.h, remove all 3 structs.
+
+13. Build both Debug and Release (they show up in /build/lib/) and move the results into the lib folder.
+	- e.g. Move to /120/lib/Debug/
+
+14. You can delete the entire build directory or just delete the intermediate directories because they contain large files that are a waste of space.
+
+
+=== Botan ===
+1. Download the latest stable source from http://botan.randombit.net/download.html and extract it to the toolset version folder.
+	- e.g. /120/Botan-1.10.6/
+	- Note that having spaces anywhere in the directory path will cause severe problems with building this library.
+
+2. Modify debug_flags in /src/build-data/cc/msvc.txt:
+	- debug_flags "/Od /Zi /Fd$(LIBNAME).pdb /DDEBUG"
+
+
+3. Ensure that you have Python installed.
+
+4. Open a cmd prompt and navigate to the Botan folder through cd. Alternatively, shift + right click on the background of the folder in Explorer gives you an "open command window here" option.
+
+5. Run the Visual Studio variables batch file.
+	- An exmaple of where to find it: "E:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+
+5.5. If you have Python 3.x, run 2to3 on configure.py in the root directory.
+	- e.g. "E:\Program Files\Python33\Tools\Scripts\2to3.py" -w configure.py
+	- It is important to do this only *once* even if you repeat the build process.
+
+6. Run the command: configure.py --with-tr1-implementation=system --enable-debug --cpu=i586 --disable-shared --link-method=copy --cc=msvc --enable-modules=aes,sha1,ofb,win32_crit_section --no-autoload
+
+7. Run the Visual Studio nmake tool.
+	- An example of where to find it: "E:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\nmake"
+
+8. Take the lib/pdb files in the root source directory and move the results into the lib folder.
+	- e.g. /120/lib/Debug/botan.lib
+
+9. Run the command: configure.py --with-tr1-implementation=system --disable-debug --cpu=i586 --disable-shared --link-method=copy --cc=msvc --enable-modules=aes,sha1,ofb,win32_crit_section --no-autoload
+
+10. Run the Visual Studio nmake tool again.
+
+11. Take the lib file in the root source directory and move it into the lib folder.
+	- e.g. /120/lib/Release/botan.lib
+
+12. Delete the /build/lib/ directory, it contains large intermediate files.
+
+
+=== Lua ===
+1. Download the latest source code from http://www.lua.org/ftp/ and extract it to the toolset version folder. Be sure to remove the version from it.
+	- e.g. /120/lua/
+
+2. Rename the /src/ folder to /include/
+
+3. Create a C++ Visual Studio project with the Empty Project template.
+
+4. Configure the project.
+	- The project *must* use the same platform toolset that you're compiling for.
+	- Add _CRT_SECURE_NO_WARNINGS to the preprocessor definitions.
+	- Configuration Properties -> C/C++ -> Code Generation -> Runtime Library *must* be Mutli-Threaded Debug DLL for Debug and Multi-Threaded DLL for Release.
+	- Configuration Properties -> General -> Target Name should be "lua" for both Debug and Release.
+	- Configuration Properties -> General -> Target Extension should be .lib for both Debug and Release.
+	- Configuration Properties -> C/C++ -> Output Files -> Program Database File Name should be "lua.pdb" for Debug and blank for Release.
+	- Configuration Properties -> C/C++ -> General -> Debug Information Format should be set to Program Database for Debug and None for Release.
+
+5. Add all code files (.h, .c) from the /include/ folder except luac.c.
+
+6. Build both Debug and Release and move the results into the lib folder.
+	- e.g. /120/lib/Debug/
+
+7. Clean up all intermediate build files because they waste space.
