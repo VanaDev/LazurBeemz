@@ -3,12 +3,12 @@
 !include "winmessages.nsh"
 !include "EnvVarUpdate.nsh"
 
-!define LIBRARY_PACK_VERSION "6.0"
+!define LIBRARY_PACK_VERSION "7.0_DEVELOPMENT"
 !define VS_TOOLSET_VERSION "120"
 !define BOOST_VERSION "1_55_0"
-!define BOTAN_VERSION "1.10.6"
+!define BOTAN_VERSION "1.10.8"
 !define SOCI_VERSION "3.1.0"
-!define LUA_VERSION "5.2.2"
+!define LUA_VERSION "5.2.3"
 !define MYSQL_VERSION "5.5 [x86]"
 
 !define ENV_HKCU 'HKCU "Environment"'
@@ -27,7 +27,7 @@ Var /GLOBAL MYSQLDIR
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\boost_${BOOST_VERSION}\LICENSE_1_0.txt"
 !insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\Botan-${BOTAN_VERSION}\doc\license.txt"
-!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\lua\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\lua-${LUA_VERSION}\LICENSE"
 !insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\soci-${SOCI_VERSION}\LICENSE_1_0.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 Page Custom MySqlEntryPage MySqlEntryLeave
@@ -71,6 +71,7 @@ Section "Install"
 	WriteRegExpandStr ${ENV_HKCU} SociVersion ${SOCI_VERSION}
 	WriteRegExpandStr ${ENV_HKCU} BotanVersion ${BOTAN_VERSION}
 	WriteRegExpandStr ${ENV_HKCU} BoostVersion ${BOOST_VERSION}
+	WriteRegExpandStr ${ENV_HKCU} LuaVersion ${LUA_VERSION}
 	WriteRegExpandStr ${ENV_HKCU} MySqlDirectory32 $MYSQLDIR
 	SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
@@ -96,6 +97,7 @@ Section "Uninstall"
 	DeleteRegValue ${ENV_HKCU} SociVersion
 	DeleteRegValue ${ENV_HKCU} BotanVersion
 	DeleteRegValue ${ENV_HKCU} BoostVersion
+	DeleteRegValue ${ENV_HKCU} LuaVersion
 	DeleteRegValue ${ENV_HKCU} MySqlDirectory32
 	SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
