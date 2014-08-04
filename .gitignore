@@ -1,0 +1,12 @@
+# Ignore all
+*
+
+# Allowed files
+!LICENSE
+!*.md
+!*.nsi
+!*.bat
+!*.ini
+!*.txt
+!.gitignore
+!.gitattributes
