@@ -77,7 +77,6 @@ It is recommended to test the library pack before running the .nsi file to compi
 2. Modify debug_flags in /src/build-data/cc/msvc.txt:
 	- debug_flags "/Od /Zi /Fd$(LIBNAME).pdb /DDEBUG"
 
-
 3. Ensure that you have Python installed.
 
 4. Open a cmd prompt and navigate to the Botan folder through cd. Alternatively, shift + right click on the background of the folder in Explorer gives you an "open command window here" option.
