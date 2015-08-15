@@ -3,13 +3,13 @@
 !include "winmessages.nsh"
 !include "EnvVarUpdate.nsh"
 
-!define LIBRARY_PACK_VERSION "6.0"
-!define VS_TOOLSET_VERSION "120"
-!define BOOST_VERSION "1_55_0"
-!define BOTAN_VERSION "1.10.6"
+!define LIBRARY_PACK_VERSION "6.2"
+!define VS_TOOLSET_VERSION "140"
+!define ASIO_VERSION "1.10.6"
+!define BOTAN_VERSION "1.10.10"
 !define SOCI_VERSION "3.1.0"
-!define LUA_VERSION "5.2.2"
-!define MYSQL_VERSION "5.5 [x86]"
+!define LUA_VERSION "5.2.4"
+!define MYSQL_VERSION "5.5 [x86/32-bit]"
 
 !define ENV_HKCU 'HKCU "Environment"'
 
@@ -25,16 +25,16 @@ Var /GLOBAL SYSTEMROOT
 Var /GLOBAL MYSQLDIR
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\boost_${BOOST_VERSION}\LICENSE_1_0.txt"
+!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\asio-${ASIO_VERSION}\LICENSE_1_0.txt"
 !insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\Botan-${BOTAN_VERSION}\doc\license.txt"
-!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\lua\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\lua-${LUA_VERSION}\LICENSE"
 !insertmacro MUI_PAGE_LICENSE "${VS_TOOLSET_VERSION}\soci-${SOCI_VERSION}\LICENSE_1_0.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 Page Custom MySqlEntryPage MySqlEntryLeave
 Function MySqlEntryPage
 	ReserveFile "MySQL Options.ini"
 	!insertmacro INSTALLOPTIONS_EXTRACT "MySQL Options.ini"
-	!insertmacro INSTALLOPTIONS_WRITE "MySQL Options.ini" "Field 1" "Text" "Choose your MySQL Server directory (currently built against ${MYSQL_VERSION} [x86])"
+	!insertmacro INSTALLOPTIONS_WRITE "MySQL Options.ini" "Field 1" "Text" "Choose your MySQL Server directory (currently built against ${MYSQL_VERSION})"
 	!insertmacro INSTALLOPTIONS_DISPLAY "MySQL Options.ini"
 FunctionEnd
 Function MySqlEntryLeave
@@ -54,7 +54,7 @@ Section "Install"
 		ExecWait '"$INSTDIR\Uninstall.exe" /S'
 
 	SetOutPath $INSTDIR
-	File /r ${VS_TOOLSET_VERSION}
+	File /r "${VS_TOOLSET_VERSION}"
 
 	${EnvVarUpdate} $0 "PATH" "A" "HKCU" "$MYSQLDIR\lib"
 
@@ -70,7 +70,8 @@ Section "Install"
 	WriteRegExpandStr ${ENV_HKCU} LazurBeemz $INSTDIR
 	WriteRegExpandStr ${ENV_HKCU} SociVersion ${SOCI_VERSION}
 	WriteRegExpandStr ${ENV_HKCU} BotanVersion ${BOTAN_VERSION}
-	WriteRegExpandStr ${ENV_HKCU} BoostVersion ${BOOST_VERSION}
+	WriteRegExpandStr ${ENV_HKCU} LuaVersion ${LUA_VERSION}
+	WriteRegExpandStr ${ENV_HKCU} AsioVersion ${ASIO_VERSION}
 	WriteRegExpandStr ${ENV_HKCU} MySqlDirectory32 $MYSQLDIR
 	SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
@@ -95,7 +96,8 @@ Section "Uninstall"
 	DeleteRegValue ${ENV_HKCU} LazurBeemz
 	DeleteRegValue ${ENV_HKCU} SociVersion
 	DeleteRegValue ${ENV_HKCU} BotanVersion
-	DeleteRegValue ${ENV_HKCU} BoostVersion
+	DeleteRegValue ${ENV_HKCU} AsioVersion
+	DeleteRegValue ${ENV_HKCU} LuaVersion
 	DeleteRegValue ${ENV_HKCU} MySqlDirectory32
 	SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 

@@ -5,22 +5,9 @@ Be sure to clean up all the zipped folders before running the .nsi file.
 It is recommended to test the library pack before running the .nsi file to compile an installer. You can do this by modifying the paths/etc. in the registry and doing a clean rebuild on Vana. You'll want to check the full C/C++ command line in one of the project's properties to verify that the new paths have been applied. Test both Debug and Release.
 
 
-=== Boost ===
-1. Download the latest release from http://sourceforge.net/projects/boost/files/boost/ and extract it to the toolset version folder.
-	- e.g. /120/boost_1_55_0/
-
-2. Open a cmd prompt and navigate to the Boost folder through cd. Alternatively, shift + right click on the background of the folder in Explorer gives you an "open command window here" option.
-
-3. Run the command: bootstrap
-
-4. Run the command: .\b2 --with-date_time --with-system --with-regex
-
-5. Take the lib files in /stage/lib/ directory and move them into the LazurBeemz lib folder.
-	- e.g. /120/lib/Debug/libbost_date_time-vc120-mt-gd-1_55.lib
-	- e.g. /120/lib/Release/libbost_date_time-vc120-mt-1_55.lib
-	- Be sure to split up debug and release properly.
-
-6. Remove any directories that aren't /boost/, /libs/, and /tools/.
+=== Asio ===
+1. Download the latest stable release from https://think-async.com/Asio/Download and extract it to the toolset version folder.
+	- e.g. /120/asio-1.10.6/
 
 
 === SOCI ===
@@ -44,7 +31,7 @@ It is recommended to test the library pack before running the .nsi file to compi
 
 7.5. Recommended modifications before clicking the Generate button.
 	- Modify CMAKE_CONFIGURATION_TYPES to only consist of "Debug;Release;"
-	- Ensure that MySQL_LIBRARY is consistent with the location of MySQL and the source files.
+	- Ensure that MySQL_LIBRARY and MYSQL_INCLUDE_DIR are consistent with the location of the MySQL lib and the source files.
 	- Uncheck all boxes except SOCI_MYSQL and WITH_MYSQL.
 
 8. After clicking the Generate button, go to the build directory to find a solution file generated.
@@ -82,7 +69,7 @@ It is recommended to test the library pack before running the .nsi file to compi
 4. Open a cmd prompt and navigate to the Botan folder through cd. Alternatively, shift + right click on the background of the folder in Explorer gives you an "open command window here" option.
 
 5. Run the Visual Studio variables batch file.
-	- An exmaple of where to find it: "E:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+	- An exmaple of where to find it: "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
 
 5.5. If you have Python 3.x, run 2to3 on configure.py in the root directory.
 	- e.g. "E:\Program Files\Python33\Tools\Scripts\2to3.py" -w configure.py
@@ -91,7 +78,7 @@ It is recommended to test the library pack before running the .nsi file to compi
 6. Run the command: configure.py --with-tr1-implementation=system --enable-debug --cpu=i586 --disable-shared --link-method=copy --cc=msvc --enable-modules=aes,sha1,ofb,win32_crit_section --no-autoload
 
 7. Run the Visual Studio nmake tool.
-	- An example of where to find it: "E:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\nmake"
+	- An example of where to find it: "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\nmake"
 
 8. Take the lib/pdb files in the root source directory and move the results into the lib folder.
 	- e.g. /120/lib/Debug/botan.lib
@@ -110,11 +97,9 @@ It is recommended to test the library pack before running the .nsi file to compi
 1. Download the latest source code from http://www.lua.org/ftp/ and extract it to the toolset version folder. Be sure to remove the version from it.
 	- e.g. /120/lua/
 
-2. Rename the /src/ folder to /include/
+2. Create a C++ Visual Studio project with the Empty Project template.
 
-3. Create a C++ Visual Studio project with the Empty Project template.
-
-4. Configure the project.
+3. Configure the project.
 	- The project *must* use the same platform toolset that you're compiling for.
 	- Add _CRT_SECURE_NO_WARNINGS to the preprocessor definitions.
 	- Configuration Properties -> C/C++ -> Code Generation -> Runtime Library *must* be Mutli-Threaded Debug DLL for Debug and Multi-Threaded DLL for Release.
@@ -123,9 +108,21 @@ It is recommended to test the library pack before running the .nsi file to compi
 	- Configuration Properties -> C/C++ -> Output Files -> Program Database File Name should be "lua.pdb" for Debug and blank for Release.
 	- Configuration Properties -> C/C++ -> General -> Debug Information Format should be set to Program Database for Debug and None for Release.
 
-5. Add all code files (.h, .c) from the /include/ folder except luac.c.
+4. Add all code files (.h, .c) from the /src/ folder except luac.c.
 
-6. Build both Debug and Release and move the results into the lib folder.
+5. Build both Debug and Release and move the results into the lib folder.
 	- e.g. /120/lib/Debug/
 
-7. Clean up all intermediate build files because they waste space.
+6. Clean up all intermediate build files because they waste space.
+
+7. Copy the license for the particular version you have by going to http://www.lua.org/manual/5.2/readme.html#license. Put this text into a file simply called "LICENSE". You can do this in Explorer by suffixing the file with a . only (so "LICENSE.")
+
+
+=== Final Steps ===
+1. After all libs are built, the lazurbeemz.nsi script must be updated with appropriate versions.
+
+2. Download the latest NSIS build from http://nsis.sourceforge.net/Download.
+
+3. Download the latest EnvVarUpdate plugin from http://nsis.sourceforge.net/Environmental_Variables:_append,_prepend,_and_remove_entries and put it into /NSIS/Include/
+
+4. Compile the script. Test the installer to ensure that it works and assigns appropriate information to the environment variables. Afterward, test building Vana to ensure that this happens cleanly.
